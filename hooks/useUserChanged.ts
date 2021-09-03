@@ -5,15 +5,15 @@ import Cookie from 'universal-cookie'
 
 export let unSubMeta: () => void
 
-export const useUserChannel = () => {
+export const useUserChanged = () => {
   const cookie = new Cookie()
   const router = useRouter()
   const HASURA_TOKEN_KEY = 'https://hasura.io/jwt/claims'
   useEffect(() => {
     const unSubUser = firebase.auth().onAuthStateChanged(async (user) => {
       if (user) {
-        const token = await user.getAuthToken(true)
-        const isTokenResult = await user.getIdTokenResult()
+        const token = await user.getIdToken(true)
+        const idTokenResult = await user.getIdTokenResult()
         const hasuraClaims = idTokenResult.claims[HASURA_TOKEN_KEY]
         if (hasuraClaims) {
           cookie.set('token', token, {path: '/'})
