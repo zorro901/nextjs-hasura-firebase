@@ -4,11 +4,11 @@ import { GraphQLClient } from 'graphql-request'
 import Cookie from 'universal-cookie'
 import {
   CREATE_TASK,
-  UPDATE_TASK,
   DELETE_TASK,
+  UPDATE_TASK,
   CREATE_NEWS,
-  UPDATE_NEWS,
-  DELETE_NEWS
+  DELETE_NEWS,
+  UPDATE_NEWS
 } from '../queries/queries'
 import { Task, EditTask, News, EditNews } from '../types/types'
 import { useDispatch } from 'react-redux'
@@ -29,17 +29,20 @@ export const useAppMutate = () => {
       }
     })
   }, [cookie.get('token')])
-  const createTaskMutation = useMutation((title: string) =>
-      graphQLClient.request(CREATE_TASK, {title: title}),
+  const createTaskMutation = useMutation(
+    (title: string) => graphQLClient.request(CREATE_TASK, {title: title}),
     {
       onSuccess: (res) => {
-        const previousTodos = queryClient.getQueriesData<Task[]>('task')
+        const previousTodos = queryClient.getQueryData<Task[]>('tasks')
         if (previousTodos) {
           queryClient.setQueryData('tasks', [
             ...previousTodos,
             res.insert_tasks_one
           ])
         }
+        dispatch(resetEditedTask())
+      },
+      onError: () => {
         dispatch(resetEditedTask())
       }
     }
@@ -48,7 +51,7 @@ export const useAppMutate = () => {
     (task: EditTask) => graphQLClient.request(UPDATE_TASK, task),
     {
       onSuccess: (res, variables) => {
-        const previousTodos = queryClient.getQueriesData<Task[]>('task')
+        const previousTodos = queryClient.getQueryData<Task[]>('tasks')
         if (previousTodos) {
           queryClient.setQueryData<Task[]>(
             'tasks',
@@ -58,14 +61,17 @@ export const useAppMutate = () => {
           )
         }
         dispatch(resetEditedTask())
+      },
+      onError: () => {
+        dispatch(resetEditedTask())
       }
     }
   )
-  const deleteTaskMutation = useMutation((id: string) =>
-      graphQLClient.request(DELETE_TASK, {id: id}),
+  const deleteTaskMutation = useMutation(
+    (id: string) => graphQLClient.request(DELETE_TASK, {id: id}),
     {
       onSuccess: (res, variables) => {
-        const previousTodos = queryClient.getQueriesData<Task[]>('task')
+        const previousTodos = queryClient.getQueryData<Task[]>('tasks')
         if (previousTodos) {
           queryClient.setQueryData<Task[]>(
             'tasks',
@@ -81,14 +87,17 @@ export const useAppMutate = () => {
       graphQLClient.request(CREATE_NEWS, {content: content}),
     {
       onSuccess: (res) => {
-        const previousNews = queryClient.getQueriesData<News[]>('new')
+        const previousNews = queryClient.getQueryData<News[]>('news')
         if (previousNews) {
           queryClient.setQueryData('news', [
             ...previousNews,
             res.insert_news_one
           ])
         }
-        dispatch(resetEditedTask())
+        dispatch(resetEditedNews())
+      },
+      onError: () => {
+        dispatch(resetEditedNews())
       }
     }
   )
@@ -96,7 +105,7 @@ export const useAppMutate = () => {
     (news: EditNews) => graphQLClient.request(UPDATE_NEWS, news),
     {
       onSuccess: (res, variables) => {
-        const previousNews = queryClient.getQueriesData<News[]>('news')
+        const previousNews = queryClient.getQueryData<News[]>('news')
         if (previousNews) {
           queryClient.setQueryData<News[]>(
             'news',
@@ -105,15 +114,18 @@ export const useAppMutate = () => {
             )
           )
         }
-        dispatch(resetEditedTask())
+        dispatch(resetEditedNews())
+      },
+      onError: () => {
+        dispatch(resetEditedNews())
       }
     }
   )
-  const deleteNewsMutation = useMutation((id: string) =>
-      graphQLClient.request(DELETE_TASK, {id: id}),
+  const deleteNewsMutation = useMutation(
+    (id: string) => graphQLClient.request(DELETE_NEWS, {id: id}),
     {
       onSuccess: (res, variables) => {
-        const previousNews = queryClient.getQueriesData<News[]>('news')
+        const previousNews = queryClient.getQueryData<News[]>('news')
         if (previousNews) {
           queryClient.setQueryData<News[]>(
             'news',
@@ -133,4 +145,3 @@ export const useAppMutate = () => {
     deleteNewsMutation
   }
 }
-
